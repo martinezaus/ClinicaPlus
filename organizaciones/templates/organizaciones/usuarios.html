@@ -1,0 +1,96 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Administración de usuarios · Clínica+{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'organizaciones/usuarios.css' %}">{% endblock %}
+{% block content %}
+<main class="user-admin">
+  <a class="back-link" href="{% url 'organizaciones:inicio' %}">← Volver al inicio</a>
+  <header class="page-heading">
+    <p class="eyebrow">Administración</p>
+    <h1>Usuarios del sistema</h1>
+    <p class="intro">Creá cuentas, asigná organización y perfil, y administrá su acceso.</p>
+  </header>
+
+  <section class="user-admin-panel" aria-labelledby="create-user-title">
+    <h2 id="create-user-title">Dar de alta un usuario</h2>
+    <p>La contraseña inicial la define el superusuario y se comunica al usuario por un canal seguro. El perfil describe su actividad; elegí aparte los cards que tendrá habilitados.</p>
+    <form method="post" class="user-form">
+      {% csrf_token %}
+      {% if formulario.non_field_errors %}
+        <div class="error-box">{{ formulario.non_field_errors }}</div>
+      {% endif %}
+      <div class="user-form-grid">
+        {% for field in formulario %}
+          <div class="field{% if field.name == 'modulos' or field.name == 'modulos_externos' %} module-access-field{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <button class="primary-button" type="submit">Crear usuario</button>
+    </form>
+  </section>
+
+  <section class="user-admin-panel" aria-labelledby="users-list-title">
+    <h2 id="users-list-title">Cuentas de usuario</h2>
+    {% if membresias %}
+      <div class="user-table-wrap">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th scope="col">Usuario</th>
+              <th scope="col">Organización</th>
+              <th scope="col">Perfil</th>
+              <th scope="col">Módulos asignados</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for membresia in membresias %}
+              <tr>
+                <th scope="row">
+                  {{ membresia.usuario.username }}
+                  {% if membresia.usuario.get_full_name %}<small>{{ membresia.usuario.get_full_name }}</small>{% endif %}
+                </th>
+                <td>{{ membresia.organizacion.nombre }}</td>
+                <td>{{ membresia.get_perfil_display }}</td>
+                <td>
+                  {% for modulo in membresia.modulos %}
+                    {% if modulo == "archivo" %}Pacientes y Archivo{% elif modulo == "pulseras" %}Admisión{% elif modulo == "facturacion" %}Facturación{% endif %}{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                  {% for modulo in membresia.modulos_externos.all %}{% if not forloop.first or membresia.modulos %}, {% endif %}{{ modulo.nombre }}{% endfor %}
+                  {% if not membresia.modulos and not membresia.modulos_externos.all %}Ninguno{% endif %}
+                </td>
+                <td>
+                  {% if membresia.activa and membresia.usuario.is_active %}
+                    <span class="user-status user-status-active">Activo</span>
+                  {% else %}
+                    <span class="user-status user-status-inactive">Inactivo</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="user-actions">
+                    <a class="secondary-button" href="{% url 'organizaciones:restablecer-contrasena-usuario' membresia.usuario_id %}">Restablecer contraseña</a>
+                    <a class="secondary-button" href="{% url 'organizaciones:editar-usuario' membresia.usuario_id %}">Editar accesos</a>
+                    {% if membresia.activa and membresia.usuario.is_active %}
+                      <form method="post" action="{% url 'organizaciones:dar-de-baja-usuario' membresia.usuario_id %}">
+                        {% csrf_token %}
+                        <button class="danger-button" type="submit">Dar de baja</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">Todavía no hay cuentas de usuario.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

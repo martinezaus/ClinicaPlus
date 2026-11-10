@@ -1,0 +1,65 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Historial de préstamos · {{ request.organizacion.nombre }}{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'archivo/styles.css' %}">{% endblock %}
+{% block content %}
+<main class="wrap">
+  <div class="page-heading"><div><p class="eyebrow">Archivo clínico</p><h1>Historial de préstamos</h1></div><a class="button button-secondary" href="{% url 'archivo:ficha' expediente.pk %}">Volver a la ficha</a></div>
+  <nav class="section-nav" aria-label="Menú de Expediente físico / Archivo">
+    <a href="{% url 'archivo:buscar' %}">Buscar</a>
+    <a href="{% url 'archivo:alta' %}">＋ Crear expediente</a>
+  </nav>
+  <section class="card patient-summary">
+    <h2>{{ expediente.paciente.apellido_nombre }}</h2>
+    <p><strong>DNI:</strong> {{ expediente.paciente.documento }}</p>
+    <p><strong>Número interno:</strong> {{ expediente.paciente.historia_clinica|default:"No utiliza / no registrado" }}</p>
+    <p><strong>Ubicación física:</strong> {{ expediente.ubicacion_completa|default:"Sin ubicación cargada" }}</p>
+  </section>
+  {% if messages %}
+    {% for message in messages %}<p class="notice {{ message.tags }}" role="status">{{ message }}</p>{% endfor %}
+  {% endif %}
+  <section class="card">
+    <div class="heading-row">
+      <h2>Movimientos</h2>
+      {% if not prestamo_activo %}<a class="action-link" href="{% url 'archivo:prestar' expediente.id %}">Registrar préstamo</a>{% endif %}
+    </div>
+    {% if prestamos %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Entregado por</th><th>Retirado por</th><th>Servicio</th><th>Profesional</th>
+              <th>Fecha de préstamo</th><th>Devolución</th><th>Días prestada</th><th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prestamo in prestamos %}
+              <tr>
+                <td>{{ prestamo.entregado_por }}</td>
+                <td>{{ prestamo.retirado_por }}</td>
+                <td>{{ prestamo.servicio }}</td>
+                <td>{{ prestamo.profesional }}</td>
+                <td>{{ prestamo.fecha_prestamo|date:"d/m/Y H:i" }}</td>
+                <td>{% if prestamo.fecha_devolucion %}{{ prestamo.fecha_devolucion|date:"d/m/Y H:i" }}{% else %}Pendiente{% endif %}</td>
+                <td>{{ prestamo.dias_prestado }}</td>
+                <td>
+                  {% if not prestamo.fecha_devolucion %}
+                    <form method="post" action="{% url 'archivo:devolver' prestamo.id %}">
+                      {% csrf_token %}
+                      <button type="submit">Registrar devolución</button>
+                    </form>
+                  {% else %}
+                    Devuelta
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>Todavía no hay movimientos para esta historia clínica.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

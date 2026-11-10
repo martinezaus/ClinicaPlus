@@ -1,0 +1,90 @@
+{% extends "organizaciones/base.html" %}
+{% load l10n %}
+{% load static %}
+{% block title %}Pulseras · {{ request.organizacion.nombre }}{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'pulseras/styles.css' %}">{% endblock %}
+{% block content %}
+<main class="wrap">
+  <div class="page-heading"><div><p class="eyebrow">Identificación clínica</p><h1>Pulseras identificatorias</h1></div></div>
+  <nav class="section-nav" aria-label="Menú de Admisión">
+    <a href="{% url 'pulseras:form' %}" aria-current="page">Emitir pulsera</a>
+  </nav>
+  <p class="sub">Elegí el tamaño correcto de la pulsera y verificá los datos antes de imprimir.</p>
+
+  {% if messages %}
+    {% for message in messages %}
+      <p class="notice {{ message.tags }}" role="status">{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+
+  {% if impresoras %}
+    <section class="card printer-list" aria-labelledby="impresoras-cargadas">
+      <h2 id="impresoras-cargadas">Impresoras cargadas</h2>
+      <ul>
+        {% for impresora in impresoras %}
+          <li>
+            <strong>{{ impresora.nombre }}</strong> — {{ impresora.modelo }}
+            {% if impresora.servicio %}({{ impresora.servicio }}){% endif %}
+            <span class="printer-state">{{ impresora.estado_configuracion }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% else %}
+    <p class="notice warning">
+      Todavía no hay impresoras cargadas.
+      <a href="{% url 'admin:pulseras_impresorapulsera_changelist' %}">Abrir administración de impresoras</a>.
+    </p>
+  {% endif %}
+
+  {% if not impresoras_configuradas %}
+    <p class="notice warning">
+      No hay una impresora lista para el tamaño seleccionado. Completá la cola USB, las medidas adulto/pediátrico y activá el equipo en
+      <a href="{% url 'admin:pulseras_impresorapulsera_changelist' %}">Administración de impresoras</a>.
+    </p>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <section class="card" aria-labelledby="datos-paciente">
+      <h2 id="datos-paciente">Datos del paciente</h2>
+      <div class="fields">
+        {% for field in form %}
+          <div class="field">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<p class="error">{{ error }}</p>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="form-actions">
+        <button type="submit" name="accion" value="vista_previa">Actualizar vista previa</button>
+        <button type="submit" name="accion" value="imprimir" {% if not impresoras_configuradas %}disabled{% endif %}>
+          Imprimir pulsera
+        </button>
+      </div>
+    </section>
+  </form>
+
+  {% if datos_pulsera %}
+    <section class="card" aria-labelledby="vista-previa">
+      <h2 id="vista-previa">Vista previa del contenido — {{ datos_pulsera.tipo|title }}</h2>
+      <div class="wristband wristband-{{ datos_pulsera.tipo }}">
+        <strong class="name">{{ datos_pulsera.apellido_nombre }}</strong>
+        <span>DNI {{ datos_pulsera.documento }}</span>
+        <span>Nac. {{ datos_pulsera.fecha_nacimiento|date:"d/m/Y" }}</span>
+        {% if datos_pulsera.historia_clinica %}<span>HC {{ datos_pulsera.historia_clinica }}</span>{% endif %}
+        <span>{{ datos_pulsera.servicio }}</span>
+        {% if datos_pulsera.alergias %}<strong class="allergy">ALERGIA: {{ datos_pulsera.alergias }}</strong>{% endif %}
+      </div>
+      <p class="notice">Vista previa informativa; no está a escala de impresión.</p>
+      {% if perfil %}
+        <p class="notice">
+          Destino: {{ perfil.impresora.nombre }} · {{ perfil.ancho_mm|unlocalize }} × {{ perfil.largo_mm|unlocalize }} mm · {{ perfil.impresora.dpi }} DPI.
+        </p>
+      {% endif %}
+    </section>
+  {% endif %}
+</main>
+{% endblock %}

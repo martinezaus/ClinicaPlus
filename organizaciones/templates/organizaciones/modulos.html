@@ -1,0 +1,82 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Módulos conectados · Clínica+{% endblock %}
+{% block app_styles %}
+<link rel="stylesheet" href="{% static 'organizaciones/styles.css' %}">
+<link rel="stylesheet" href="{% static 'organizaciones/usuarios.css' %}">
+{% endblock %}
+{% block content %}
+<main class="user-admin">
+  <a class="back-link" href="{% url 'organizaciones:configuracion' %}">← Volver a Configuración</a>
+  <header class="page-heading">
+    <p class="eyebrow">Configuración</p>
+    <h1>Módulos conectados</h1>
+    <p class="intro">Agregá sistemas externos indicando el nombre y el enlace. Luego asigná cada módulo a los usuarios que deban verlo.</p>
+  </header>
+
+  <section class="user-admin-panel" aria-labelledby="create-module-title">
+    <h2 id="create-module-title">Agregar un módulo</h2>
+    <p>Ingresá una dirección HTTP o HTTPS. El acceso a las funciones del sistema conectado debe controlarse en ese sistema.</p>
+    <form method="post" action="{% url 'organizaciones:alta-modulo' %}" class="user-form">
+      {% csrf_token %}
+      {% if formulario.non_field_errors %}
+        <div class="error-box">{{ formulario.non_field_errors }}</div>
+      {% endif %}
+      <div class="user-form-grid">
+        {% for field in formulario %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <button class="primary-button" type="submit">Agregar módulo</button>
+    </form>
+  </section>
+
+  <section class="user-admin-panel" aria-labelledby="modules-list-title">
+    <h2 id="modules-list-title">Sistemas disponibles</h2>
+    {% if modulos %}
+      <div class="user-table-wrap">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Enlace</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for modulo in modulos %}
+              <tr>
+                <th scope="row">{{ modulo.nombre }}</th>
+                <td><a href="{{ modulo.url }}" target="_blank" rel="noopener noreferrer">{{ modulo.url }}</a></td>
+                <td>
+                  {% if modulo.activo %}
+                    <span class="user-status user-status-active">Activo</span>
+                  {% else %}
+                    <span class="user-status user-status-inactive">Inactivo</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="user-actions">
+                    <a class="secondary-button" href="{% url 'organizaciones:editar-modulo' modulo.pk %}">Editar</a>
+                    <form method="post" action="{% url 'organizaciones:cambiar-estado-modulo' modulo.pk %}">
+                      {% csrf_token %}
+                      <button class="secondary-button" type="submit">{% if modulo.activo %}Desactivar{% else %}Activar{% endif %}</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">Todavía no hay módulos conectados.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

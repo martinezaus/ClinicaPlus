@@ -1,0 +1,19 @@
+{% extends "organizaciones/base.html" %}
+{% block title %}Soporte · {{ request.organizacion.nombre }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Ayuda</p>
+    <h1>Soporte</h1>
+    <p class="sub">Un espacio para resolver dudas junto con el equipo de soporte.</p>
+  </div>
+</div>
+<section class="content-card support-card">
+  <span class="support-illustration" aria-hidden="true">☏</span>
+  <div>
+    <span class="status-pill">Canal en preparación</span>
+    <h2>Las conversaciones todavía no están conectadas</h2>
+    <p>Estamos preparando este espacio para que puedas conversar con las personas que te ayudan. Por ahora, contactá al administrador de {{ request.organizacion.nombre }} para recibir asistencia.</p>
+  </div>
+</section>
+{% endblock %}

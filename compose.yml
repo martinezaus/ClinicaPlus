@@ -1,0 +1,8 @@
+name: clinica-dev
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped

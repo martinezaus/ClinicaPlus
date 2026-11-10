@@ -1,0 +1,33 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Restablecer contraseña · Clínica+{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'organizaciones/usuarios.css' %}">{% endblock %}
+{% block content %}
+<main class="user-admin user-admin-narrow">
+  <a class="back-link" href="{% url 'organizaciones:usuarios' %}">← Volver a usuarios</a>
+  <section class="user-admin-panel">
+    <p class="eyebrow">Administración de usuarios</p>
+    <h1>Restablecer contraseña</h1>
+    <p class="intro">Usuario: <strong>{{ membresia.usuario.username }}</strong> · {{ membresia.organizacion.nombre }}</p>
+    <p>Definí una contraseña temporal y comunicásela al usuario por un canal seguro.</p>
+    <form method="post" class="user-form">
+      {% csrf_token %}
+      {% if formulario.non_field_errors %}
+        <div class="error-box">{{ formulario.non_field_errors }}</div>
+      {% endif %}
+      {% for field in formulario %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+          {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+      {% endfor %}
+      <div class="user-actions">
+        <button class="primary-button" type="submit">Guardar contraseña</button>
+        <a class="secondary-button" href="{% url 'organizaciones:usuarios' %}">Cancelar</a>
+      </div>
+    </form>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Préstamo de historia clínica · {{ request.organizacion.nombre }}{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'archivo/styles.css' %}">{% endblock %}
+{% block content %}
+<main class="wrap narrow">
+  <div class="page-heading"><div><p class="eyebrow">Archivo clínico</p><h1>Préstamo de historia clínica</h1></div><a class="button button-secondary" href="{% url 'archivo:ficha' expediente.pk %}">Volver a la ficha</a></div>
+  <section class="card patient-summary">
+    <h2>{{ expediente.paciente.apellido_nombre }}</h2>
+    <p><strong>DNI:</strong> {{ expediente.paciente.documento }}</p>
+    <p><strong>Número interno:</strong> {{ expediente.paciente.historia_clinica|default:"No utiliza / no registrado" }}</p>
+    <p><strong>Ubicación física:</strong> {{ expediente.ubicacion_completa|default:"Sin ubicación cargada" }}</p>
+  </section>
+  <form method="post">
+    {% csrf_token %}
+    <section class="card">
+      <h2>Datos de entrega</h2>
+      <div class="fields">
+        {% for field in form %}
+          <div class="field">
+            {{ field.label_tag }}
+            {{ field }}
+            {% for error in field.errors %}<p class="error">{{ error }}</p>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <p class="sub">La fecha y hora de entrega se registran automáticamente al guardar.</p>
+      <button type="submit">Confirmar préstamo</button>
+      <a class="cancel-link" href="{% url 'archivo:buscar' %}">Cancelar</a>
+    </section>
+  </form>
+</main>
+{% endblock %}

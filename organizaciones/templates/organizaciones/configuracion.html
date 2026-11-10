@@ -1,0 +1,37 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Configuración · Clínica+{% endblock %}
+{% block app_styles %}
+<link rel="stylesheet" href="{% static 'organizaciones/styles.css' %}">
+<link rel="stylesheet" href="{% static 'organizaciones/usuarios.css' %}">
+{% endblock %}
+{% block content %}
+<main class="user-admin">
+  <a class="back-link" href="{% url 'organizaciones:inicio' %}">← Volver al inicio</a>
+  <header class="page-heading">
+    <p class="eyebrow">Sistema</p>
+    <h1>Configuración</h1>
+    <p class="intro">Administrá las cuentas y los accesos de Clínica+.</p>
+  </header>
+  <div class="module-grid" aria-label="Opciones de configuración">
+    <a class="module-card" href="{% url 'organizaciones:usuarios' %}">
+      <span class="module-icon" aria-hidden="true">♙</span>
+      <span class="module-name">USUARIOS</span>
+      <span class="system-description">Crear usuarios, asignar cards, editar accesos y restablecer contraseñas.</span>
+      <span class="module-open">Administrar usuarios →</span>
+    </a>
+    <a class="module-card" href="{% url 'organizaciones:modulos' %}">
+      <span class="module-icon" aria-hidden="true">▦</span>
+      <span class="module-name">MÓDULOS</span>
+      <span class="system-description">Conectá sistemas existentes con su nombre y enlace de ingreso.</span>
+      <span class="module-open">Administrar módulos →</span>
+    </a>
+    <a class="module-card" href="{% url 'organizaciones:parametros' %}">
+      <span class="module-icon" aria-hidden="true">⚙</span>
+      <span class="module-name">PARÁMETROS</span>
+      <span class="system-description">Configuración de parámetros generales del sistema.</span>
+      <span class="module-open">Configurar parámetros →</span>
+    </a>
+  </div>
+</main>
+{% endblock %}

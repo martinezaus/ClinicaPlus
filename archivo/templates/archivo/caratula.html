@@ -1,0 +1,32 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Carátula · {{ paciente.apellido_nombre }}{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'archivo/styles.css' %}">{% endblock %}
+{% block content %}
+<main class="wrap">
+  <div class="print-actions">
+    <button class="button" type="button" onclick="window.print()">Imprimir carátula</button>
+    <a class="button" href="{% url 'pacientes:index' %}">Volver a pacientes</a>
+  </div>
+  <article class="print-document">
+    <header>
+      <div>
+        <p class="eyebrow">Archivo clínico</p>
+        <h1>{{ request.organizacion.nombre }}</h1>
+      </div>
+      <div>
+        <strong>Carátula de historia clínica</strong><br>
+        <small>Impresión: {{ fecha_impresion|date:"d/m/Y" }}</small>
+      </div>
+    </header>
+    <h2>{{ paciente.apellido_nombre }}</h2>
+    <dl>
+      <div><dt>DNI / documento</dt><dd>{{ paciente.documento|default:"No registrado" }}</dd></div>
+      <div><dt>Número de historia clínica</dt><dd>{{ paciente.historia_clinica|default:"No registrado" }}</dd></div>
+      <div><dt>Fecha de nacimiento</dt><dd>{{ paciente.fecha_nacimiento|date:"d/m/Y"|default:"No registrada" }}</dd></div>
+      <div><dt>Estado del expediente</dt><dd>{% if expediente %}{{ expediente.get_archivo_display }}{% else %}Pendiente de alta en Archivo{% endif %}</dd></div>
+      <div><dt>Ubicación física</dt><dd>{% if expediente %}{{ expediente.ubicacion_completa|default:"Sin ubicación cargada" }}{% else %}No registrada{% endif %}</dd></div>
+    </dl>
+  </article>
+</main>
+{% endblock %}

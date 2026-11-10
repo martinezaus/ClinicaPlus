@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Clínica+{% endblock %}</title>
+  {% block app_styles %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'organizaciones/shared.css' %}">
+  <link rel="stylesheet" href="{% static 'organizaciones/clinical.css' %}">
+</head>
+<body>
+<header class="app-header">
+  <a class="org-brand" href="{% url 'organizaciones:inicio' %}" aria-label="Inicio — {{ request.organizacion.nombre|default:'Clínica+' }}">
+    <span class="org-logo" aria-hidden="true">
+      {% if request.organizacion and request.organizacion.logo %}
+        <img src="{{ request.organizacion.logo.url }}" alt="">
+      {% else %}
+        <span>{{ request.organizacion.nombre|default:"C+"|slice:":2"|upper }}</span>
+      {% endif %}
+    </span>
+    <span class="org-brand-copy">
+      <strong>{{ request.organizacion.nombre|default:"Clínica+" }}</strong>
+      <small>Sistema de gestión clínica</small>
+    </span>
+  </a>
+  <div class="header-user">
+    <span class="user-avatar" aria-hidden="true">{{ request.user.get_short_name|default:request.user.username|slice:":1"|upper }}</span>
+    <span class="user-copy">
+      <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+      <small>{{ request.user.membresia_organizacion.get_perfil_display|default:"Administración" }}</small>
+    </span>
+    <form method="post" action="{% url 'organizaciones:logout' %}">
+      {% csrf_token %}
+      <button class="logout-button" type="submit">Salir</button>
+    </form>
+  </div>
+</header>
+<nav class="app-nav" aria-label="Navegación principal">
+  <div class="app-nav-inner">
+    {% for item in navigation_items %}
+      <a href="{% url item.url %}" class="nav-link{% if request.resolver_match and request.resolver_match.namespace in item.url %} is-active{% endif %}">
+        <span aria-hidden="true">{{ item.icon }}</span>{{ item.label }}
+      </a>
+    {% endfor %}
+    <a class="nav-link support-link" href="{% url 'organizaciones:soporte' %}"><span aria-hidden="true">☏</span> Soporte</a>
+  </div>
+</nav>
+<main class="app-main">
+  {% if messages %}
+    <div class="global-messages" aria-live="polite">
+      {% for message in messages %}<p class="notice {{ message.tags }}">{{ message }}</p>{% endfor %}
+    </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="app-footer">{{ request.organizacion.nombre|default:"Clínica+" }} · Atención organizada, información clara.</footer>
+</body>
+</html>

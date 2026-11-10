@@ -1,0 +1,32 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Editar ubicación · {{ request.organizacion.nombre }}{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'archivo/styles.css' %}">{% endblock %}
+{% block content %}
+<main class="wrap narrow">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Archivo clínico</p>
+      <h1>Editar ubicación física</h1>
+      <p class="sub">{{ expediente.paciente.apellido_nombre }} · DNI {{ expediente.paciente.documento|default:"No registrado" }}</p>
+    </div>
+    <a class="button button-secondary" href="{% url 'archivo:ficha' expediente.id %}">Volver a la ficha</a>
+  </div>
+
+  <form method="post" class="card">
+    {% csrf_token %}
+    <h2>Ubicación física</h2>
+    <div class="fields">
+      {% for field in form %}
+        <div class="field">
+          {{ field.label_tag }}
+          {{ field }}
+          {% for error in field.errors %}<p class="error">{{ error }}</p>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+    <button type="submit">Guardar ubicación</button>
+    <a class="cancel-link" href="{% url 'archivo:ficha' expediente.id %}">Cancelar</a>
+  </form>
+</main>
+{% endblock %}

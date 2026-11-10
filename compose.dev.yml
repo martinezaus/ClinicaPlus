@@ -1,0 +1,46 @@
+x-postgres-environment: &postgres-environment
+  POSTGRES_DB: clinica
+  POSTGRES_USER: clinica
+  POSTGRES_PASSWORD: h81m-vg4
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment: *postgres-environment
+    ports:
+      - "127.0.0.1:${CLINICA_DEV_DB_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    command:
+      - sh
+      - -c
+      - python manage.py migrate --noinput && exec python manage.py runserver 0.0.0.0:8000
+    environment:
+      DJANGO_SETTINGS_MODULE: config.development
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CSRF_TRUSTED_ORIGINS: http://localhost:${CLINICA_DEV_PORT:-8084},http://127.0.0.1:${CLINICA_DEV_PORT:-8084}
+      DJANGO_TIME_ZONE: ${DJANGO_TIME_ZONE:-America/Argentina/Buenos_Aires}
+      <<: *postgres-environment
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    ports:
+      - "127.0.0.1:${CLINICA_DEV_PORT:-8084}:8000"
+    volumes:
+      - .:/app
+      - development_media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  development_postgres:
+  development_media:

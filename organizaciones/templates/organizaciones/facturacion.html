@@ -1,0 +1,14 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Facturación · Clínica+{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'organizaciones/usuarios.css' %}">{% endblock %}
+{% block content %}
+<main class="user-admin user-admin-narrow">
+  <a class="back-link" href="{% url 'organizaciones:inicio' %}">← Volver al inicio</a>
+  <section class="user-admin-panel">
+    <p class="eyebrow">Módulo habilitado</p>
+    <h1>Facturación</h1>
+    <p>El acceso a este módulo está habilitado para tu usuario. La funcionalidad de facturación todavía está en preparación.</p>
+  </section>
+</main>
+{% endblock %}

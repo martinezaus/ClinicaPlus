@@ -1,0 +1,117 @@
+:root {
+  --surface: #fff;
+  --border: #dce4eb;
+  --ink: #172433;
+  --muted: #5c6e7a;
+  --accent: #12617c;
+  --page: #f4f7fa;
+  --radius: 12px;
+}
+
+body:not(.login-page) {
+  background: var(--page);
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+body:not(.login-page) .wrap {
+  width: min(1440px, 92vw);
+  max-width: 1440px;
+  margin: 36px auto;
+}
+
+body:not(.login-page) h1 {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: clamp(26px, 3vw, 34px);
+  line-height: 1.2;
+}
+
+body:not(.login-page) h2 {
+  color: var(--ink);
+}
+
+body:not(.login-page) .sub,
+body:not(.login-page) .intro {
+  color: var(--muted);
+}
+
+body:not(.login-page) .card {
+  border-color: var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 8px 24px #19354d0a;
+}
+
+body:not(.login-page) .field input,
+body:not(.login-page) .field select,
+body:not(.login-page) .field textarea {
+  border-color: #bdcbd5;
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+body:not(.login-page) button {
+  border-radius: 7px;
+  font: inherit;
+}
+
+body:not(.login-page) button:focus-visible,
+body:not(.login-page) input:focus-visible,
+body:not(.login-page) select:focus-visible,
+body:not(.login-page) textarea:focus-visible,
+body:not(.login-page) a:focus-visible {
+  outline: 3px solid #63b2cd;
+  outline-offset: 2px;
+}
+
+body:not(.login-page) .back,
+body:not(.login-page) .action-link {
+  color: var(--accent);
+}
+
+body:not(.login-page) .wristband {
+  border-color: var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.coming-soon {
+  margin-top: 42px;
+}
+
+.coming-soon > h2 {
+  margin-bottom: 8px;
+}
+
+.coming-soon .module-grid {
+  margin-top: 18px;
+}
+
+.module-card-disabled {
+  min-height: 145px;
+  background: #f9fbfc;
+  color: #5c6e7a;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: .8;
+}
+
+.module-card-disabled:hover {
+  border-color: var(--border);
+  transform: none;
+}
+
+.module-card-disabled .module-icon,
+.module-card-disabled .module-open {
+  color: #667984;
+}
+
+@media (max-width: 620px) {
+  body:not(.login-page) .wrap {
+    width: auto;
+    margin: 22px 16px;
+  }
+}

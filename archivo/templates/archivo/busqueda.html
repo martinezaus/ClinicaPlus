@@ -1,0 +1,116 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Archivo · {{ request.organizacion.nombre }}{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'archivo/styles.css' %}">{% endblock %}
+{% block content %}
+<main class="wrap">
+  <div class="page-heading">
+    <div><p class="eyebrow">Archivo clínico</p><h1>Historias clínicas</h1></div>
+    <span class="patient-total">Archivo físico</span>
+  </div>
+  <nav class="section-nav" aria-label="Menú de Expediente físico / Archivo">
+    <a href="{% url 'archivo:buscar' %}" aria-current="page">Buscar</a>
+    <a href="{% url 'archivo:alta' %}">＋ Crear expediente</a>
+  </nav>
+  <p class="sub">
+    Buscá al paciente por DNI, número interno de HC o apellido y nombre. 
+  </p>
+
+  <div class="archive-layout">
+    <section class="main-column">
+      
+      <section class="card" aria-labelledby="busqueda-title">
+        
+        <h2 id="busqueda-title">Identificación del paciente</h2>
+        <form method="post" class="search">
+          {% csrf_token %}
+          <div class="field">
+            {{ form.identificador.label_tag }}
+            {{ form.identificador }}
+            {% for error in form.identificador.errors %}<p class="error">{{ error }}</p>{% endfor %}
+          </div>
+          <button type="submit">Buscar</button>
+        </form>
+      </section>
+      
+
+      {% if buscado %}
+        <section class="card" aria-labelledby="resultados-title">
+          <h2 id="resultados-title">Resultados</h2>
+          {% if expedientes %}
+            <div class="results">
+              {% for expediente in expedientes %}
+                <article class="result">
+                  <h3>{{ expediente.paciente.apellido_nombre }}</h3>
+                  <p><strong>DNI:</strong> {{ expediente.paciente.documento }}</p>
+                  <p><strong>Número interno:</strong> {{ expediente.paciente.historia_clinica|default:"No utiliza / no registrado" }}</p>
+                  <p><strong>Ubicación física:</strong> {{ expediente.ubicacion_completa|default:"Sin ubicación cargada" }}</p>
+                  <div class="result-actions">
+                    <a class="action-link" href="{% url 'archivo:ficha' expediente.id %}">Abrir ficha del paciente</a>
+                    {% if expediente.prestamos_activos %}
+                      <span class="loan-status">Prestado actualmente</span>
+                    {% else %}
+                      <a class="action-link" href="{% url 'archivo:prestar' expediente.id %}">Registrar préstamo</a>
+                    {% endif %}
+                    <a class="action-link" href="{% url 'archivo:historial' expediente.id %}">Ver historial</a>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          {% elif pacientes_sistema %}
+            <p class="notice info" role="status">
+              El paciente existe en el registro general, pero todavía no tiene un expediente físico dado de alta en Archivo.
+            </p>
+            <div class="results">
+              {% for paciente in pacientes_sistema %}
+                <article class="result">
+                  <h3>{{ paciente.apellido_nombre }}</h3>
+                  <p><strong>DNI:</strong> {{ paciente.documento }}</p>
+                  <p><strong>Número de historia clínica:</strong> {{ paciente.historia_clinica|default:"No registrado" }}</p>
+                  <a class="action-link" href="{% url 'archivo:alta' %}?paciente_id={{ paciente.pk }}">
+                    Dar de alta este expediente en Archivo
+                  </a>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state" role="status">
+              <strong>No encontramos coincidencias.</strong>
+              <p>Podés registrar primero al paciente y luego crear su expediente físico.</p>
+              <a class="button button-primary" href="{% url 'pacientes:crear' %}?crear_expediente=1">＋ Registrar paciente</a>
+            </div>
+          {% endif %}
+        </section>
+      {% endif %}
+    </section>
+
+    <aside class="card activity-column" aria-labelledby="actividad-title">
+      <h2 id="actividad-title">Últimas HC entregadas / devueltas</h2>
+      {% if actividad_reciente %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>HC / DNI</th><th>Entregó</th><th>Retiró</th><th>Servicio / profesional</th><th>Estado</th><th>Actividad</th><th>Historial</th></tr>
+            </thead>
+            <tbody>
+              {% for prestamo in actividad_reciente %}
+                <tr>
+                  <td>{{ prestamo.expediente.paciente.historia_clinica|default:prestamo.expediente.paciente.documento }}</td>
+                  <td>{{ prestamo.entregado_por }}</td>
+                  <td>{{ prestamo.retirado_por }}</td>
+                  <td>{{ prestamo.servicio }}<br>{{ prestamo.profesional }}</td>
+                  <td>{% if prestamo.fecha_devolucion %}Devuelta{% else %}Prestada{% endif %}</td>
+                  <td>{% if prestamo.fecha_devolucion %}{{ prestamo.fecha_devolucion|date:"d/m/Y H:i" }}{% else %}{{ prestamo.fecha_prestamo|date:"d/m/Y H:i" }}{% endif %}</td>
+                  <td><a href="{% url 'archivo:historial' prestamo.expediente_id %}">Ver</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="sub">Todavía no hay préstamos registrados.</p>
+      {% endif %}
+    </aside>
+  </div>
+</main>
+{% endblock %}

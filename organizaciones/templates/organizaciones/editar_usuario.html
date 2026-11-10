@@ -1,0 +1,53 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Editar usuario · Clínica+{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'organizaciones/usuarios.css' %}">{% endblock %}
+{% block content %}
+<main class="user-admin user-admin-narrow">
+  <a class="back-link" href="{% url 'organizaciones:usuarios' %}">← Volver a usuarios</a>
+  <section class="user-admin-panel">
+    <p class="eyebrow">Configuración · Usuarios</p>
+    <h1>Editar usuario</h1>
+    <p class="intro">Cuenta: <strong>{{ membresia.usuario.username }}</strong></p>
+    <p>El perfil indica la actividad. Los cards habilitados definen a qué módulos puede ingresar.</p>
+    <form method="post" class="user-form">
+      {% csrf_token %}
+      {% if formulario.non_field_errors %}
+        <div class="error-box">{{ formulario.non_field_errors }}</div>
+      {% endif %}
+      <div class="user-form-grid">
+        {% for field in formulario %}
+          {% if field.name != "modulos" and field.name != "modulos_externos" %}
+            <div class="field{% if field.field.widget.input_type == 'checkbox' %} checkbox-field{% endif %}">
+              {% if field.field.widget.input_type == 'checkbox' %}
+                <label>{{ field }} {{ field.label }}</label>
+              {% else %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+              {% endif %}
+              {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+              {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+        <fieldset class="module-access">
+          <legend>Módulos de Clínica+</legend>
+          <p class="field-help">Archivo habilita Pacientes y Expediente físico / Archivo.</p>
+          {{ formulario.modulos }}
+          {% for error in formulario.modulos.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </fieldset>
+        <fieldset class="module-access">
+          <legend>Módulos conectados</legend>
+          <p class="field-help">Los permisos internos de cada sistema externo se gestionan allí.</p>
+          {{ formulario.modulos_externos }}
+          {% for error in formulario.modulos_externos.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </fieldset>
+      </div>
+      <div class="user-actions">
+        <button class="primary-button" type="submit">Guardar cambios</button>
+        <a class="secondary-button" href="{% url 'organizaciones:usuarios' %}">Cancelar</a>
+      </div>
+    </form>
+  </section>
+</main>
+{% endblock %}

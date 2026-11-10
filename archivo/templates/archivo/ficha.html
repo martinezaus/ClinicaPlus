@@ -1,0 +1,81 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Ficha de paciente · {{ request.organizacion.nombre }}{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'archivo/styles.css' %}">{% endblock %}
+{% block content %}
+<main class="wrap narrow">
+  <div class="page-heading"><div><p class="eyebrow">Archivo clínico</p><h1>Ficha del paciente</h1></div><a class="button button-secondary" href="{% url 'archivo:buscar' %}">Volver al archivo</a></div>
+  <nav class="section-nav" aria-label="Menú de Expediente físico / Archivo">
+    <a href="{% url 'archivo:buscar' %}">Buscar</a>
+    <a href="{% url 'archivo:alta' %}">＋ Crear expediente</a>
+  </nav>
+
+  <section class="card patient-summary" aria-labelledby="patient-name">
+    <h2 id="patient-name">{{ expediente.paciente.apellido_nombre }}</h2>
+    <div class="patient-management-actions" aria-label="Acciones de la ficha">
+      <a class="action-link" href="{% url 'pacientes:editar' expediente.paciente_id %}">Modificar datos del paciente</a>
+      <a class="action-link" href="{% url 'archivo:editar_ubicacion' expediente.id %}">Editar ubicación física</a>
+    </div>
+    <h3 class="physical-location-title">Ubicación física</h3>
+    <dl class="patient-details">
+      <div><dt>DNI</dt><dd>{{ expediente.paciente.documento }}</dd></div>
+      <div><dt>Número interno de HC</dt><dd>{{ expediente.paciente.historia_clinica|default:"No utiliza / no registrado" }}</dd></div>
+      <div><dt>Pasillo</dt><dd>{{ expediente.pasillo|default:"No registrado" }}</dd></div>
+      <div><dt>Estantería</dt><dd>{{ expediente.estanteria|default:"No registrada" }}</dd></div>
+      <div><dt>Estante / nivel</dt><dd>{{ expediente.estante|default:"No registrado" }}</dd></div>
+      <div><dt>Referencia adicional</dt><dd>{{ expediente.referencia_ubicacion|default:"—" }}</dd></div>
+    </dl>
+    <div class="result-actions">
+      {% if prestamo_activo %}
+        <span class="loan-status">La historia está prestada actualmente</span>
+      {% else %}
+        <a class="action-link" href="{% url 'archivo:prestar' expediente.id %}">Registrar préstamo</a>
+      {% endif %}
+      <a class="action-link" href="{% url 'archivo:historial' expediente.id %}">Ver historial completo</a>
+    </div>
+    {% if expediente.archivo == "A" %}
+      <form method="post" action="{% url 'archivo:enviar_a_pasivo' expediente.id %}" class="archive-status-form">
+        {% csrf_token %}
+        <button type="submit" class="archive-status-button">Enviar al Archivo Pasivo</button>
+      </form>
+    {% else %}
+      <p class="archive-status-label">Estado: {{ expediente.get_archivo_display }}</p>
+    {% endif %}
+  </section>
+
+  <section class="card" aria-labelledby="last-movement-title">
+    <h2 id="last-movement-title">Estado e historial reciente</h2>
+    {% if prestamos %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Estado</th><th>Entregó</th><th>Retiró</th><th>Servicio</th><th>Profesional</th><th>Préstamo</th><th>Devolución</th><th>Días</th></tr>
+          </thead>
+          <tbody>
+            {% for prestamo in prestamos|slice:":5" %}
+              <tr>
+                <td>{% if prestamo.fecha_devolucion %}Devuelta{% else %}Prestada{% endif %}</td>
+                <td>{{ prestamo.entregado_por }}</td>
+                <td>{{ prestamo.retirado_por }}</td>
+                <td>{{ prestamo.servicio }}</td>
+                <td>{{ prestamo.profesional }}</td>
+                <td>{{ prestamo.fecha_prestamo|date:"d/m/Y H:i" }}</td>
+                <td>{% if prestamo.fecha_devolucion %}{{ prestamo.fecha_devolucion|date:"d/m/Y H:i" }}{% else %}Pendiente{% endif %}</td>
+                <td>{{ prestamo.dias_prestado }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if prestamo_activo %}
+        <form method="post" action="{% url 'archivo:devolver' prestamo_activo.id %}" class="return-form">
+          {% csrf_token %}
+          <button type="submit">Registrar devolución de esta HC</button>
+        </form>
+      {% endif %}
+    {% else %}
+      <p>El paciente está registrado en el Archivo, pero todavía no tiene préstamos.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

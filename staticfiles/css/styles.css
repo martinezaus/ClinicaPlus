@@ -1,0 +1,22 @@
+  :root { --border:#e3e3e3; --border-strong:#cfcfcf; --text:#1a1a1a; --muted:#5f5f5f; --radius:14px; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:32px 40px; background:#fff; color:var(--text);
+    font-family:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif; font-size:15px; }
+  .wrap { max-width:740px; }
+  .back { display:inline-flex; align-items:center; gap:6px; margin-bottom:18px; color:var(--muted); text-decoration:none; font-size:14px; }
+  .back:hover { color:var(--text); }
+  .back:focus-visible, .card:focus-visible { outline:2px solid var(--text); outline-offset:2px; }
+  h1 { font-size:22px; font-weight:600; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px; }
+  .card { display:flex; flex-direction:column; gap:10px; padding:20px; text-decoration:none; color:inherit;
+    background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+    transition:border-color .15s, transform .15s, box-shadow .15s; }
+  .card:hover { border-color:var(--border-strong); box-shadow:0 2px 10px rgba(0,0,0,.06); transform:translateY(-2px); }
+  .card:active { transform:translateY(0); }
+  .icon { width:40px; height:40px; display:grid; place-items:center; border:1px solid var(--border-strong); border-radius:10px; }
+  .icon svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .card h2 { margin:0; font-size:16px; font-weight:600; }
+  .card p { margin:0; font-size:13px; color:var(--muted); line-height:1.4; }
+  @media (prefers-reduced-motion: reduce) { .card { transition:none; } }
+  @media (max-width:640px) { body { padding:16px; } }

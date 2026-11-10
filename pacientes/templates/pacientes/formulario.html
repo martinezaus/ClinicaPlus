@@ -1,0 +1,35 @@
+{% extends "organizaciones/base.html" %}
+{% block title %}{% if paciente %}Editar paciente{% else %}Nuevo paciente{% endif %} · {{ request.organizacion.nombre }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Registro de pacientes</p>
+    <h1>{% if paciente %}Modificar paciente{% else %}Alta de paciente{% endif %}</h1>
+    <p class="sub">La identidad se registra una sola vez y queda disponible para Archivo.</p>
+  </div>
+  <a class="button button-secondary" href="{% url 'pacientes:index' %}">Volver al listado</a>
+</div>
+<nav class="section-nav" aria-label="Menú de Pacientes">
+  <a href="{% url 'pacientes:index' %}">Pacientes</a>
+  <a href="{% url 'pacientes:crear' %}" aria-current="page">＋ Alta</a>
+</nav>
+<form method="post" class="form-card">
+  {% csrf_token %}
+  {% if crear_expediente %}<input type="hidden" name="crear_expediente" value="1">{% endif %}
+  {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="form-grid">
+    {% for field in form %}
+      <div class="form-field{% if field.name == 'alergias' %} field-wide{% endif %}">
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+  <div class="form-actions">
+    <button class="button button-primary" type="submit">Guardar paciente</button>
+    <a class="button button-secondary" href="{% url 'pacientes:index' %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

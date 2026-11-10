@@ -1,0 +1,86 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}{{ organizacion.nombre }} · Inicio{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'organizaciones/styles.css' %}">{% endblock %}
+{% block content %}
+<main class="dashboard">
+  <div class="dashboard-heading">
+    <div>
+      <p class="eyebrow">Panel de trabajo</p>
+      <h1>Inicio</h1>
+      <p class="intro">{{ organizacion.nombre }} · Perfil: {{ perfil }}. Accedé a las áreas de la clínica desde aquí.</p>
+    </div>
+  </div>
+
+  <div class="dashboard-layout">
+    <div class="module-grid system-grid" aria-label="Áreas del sistema">
+      {% for sistema in sistemas %}
+        {% if sistema.disponible and sistema.url %}
+        <a class="module-card system-card" href="{% url sistema.url %}">
+        {% else %}
+        <article class="module-card system-card system-card-pending" aria-disabled="true">
+        {% endif %}
+          <div class="system-card-heading">
+            <span class="module-icon" aria-hidden="true">{{ sistema.icono }}</span>
+            <span class="system-status{% if not sistema.disponible %} system-status-pending{% endif %}">
+              {{ sistema.estado|default:"En desarrollo" }}
+            </span>
+          </div>
+          <h2 class="module-name">{{ sistema.nombre }}</h2>
+          <p class="system-description">{{ sistema.descripcion }}</p>
+          {% if sistema.disponible and sistema.url %}<span class="system-card-open">Ingresar al módulo <span aria-hidden="true">→</span></span>{% endif %}
+        {% if sistema.disponible and sistema.url %}
+        </a>
+        {% else %}
+        </article>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <aside class="dashboard-sidebar">
+      <section class="dashboard-stats" aria-labelledby="stats-title">
+        <div class="stats-heading">
+          <p class="eyebrow">Resumen</p>
+          <h2 id="stats-title">Estadísticas generales</h2>
+        </div>
+        {% if estadisticas_disponibles %}
+          <div class="stats-list">
+            {% for estadistica in estadisticas %}
+              <article class="stat-card">
+                <span class="stat-icon" aria-hidden="true">{{ estadistica.icono }}</span>
+                <span class="stat-name">{{ estadistica.nombre }}</span>
+                <strong class="stat-value">{{ estadistica.valor }}</strong>
+              </article>
+            {% endfor %}
+          </div>
+          <p class="stats-note">Datos actuales de {{ organizacion.nombre }}.</p>
+        {% else %}
+          <p class="stats-note">Las estadísticas generales no están habilitadas para este perfil.</p>
+        {% endif %}
+      </section>
+
+      {% if modulos_externos %}
+        <section class="contracted-systems" aria-labelledby="contracted-systems-title">
+          <div class="external-systems-heading">
+            <p class="eyebrow">Accesos independientes</p>
+            <h2 id="contracted-systems-title">Sistemas contratados</h2>
+            <p>Plataformas externas habilitadas para tu usuario.</p>
+          </div>
+          <div class="external-systems-list">
+            {% for modulo in modulos_externos %}
+              <a class="external-system-card" href="{{ modulo.url }}" target="_blank" rel="noopener noreferrer">
+                <span class="external-system-icon" aria-hidden="true">↗</span>
+                <span class="external-system-copy">
+                  <strong>{{ modulo.nombre }}</strong>
+                  <small>Abrir sistema</small>
+                </span>
+                <span class="external-system-arrow" aria-hidden="true">→</span>
+              </a>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    </aside>
+  </div>
+</main>
+{% endblock %}

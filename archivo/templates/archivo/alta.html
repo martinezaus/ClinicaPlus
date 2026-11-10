@@ -1,0 +1,76 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Alta de expediente · {{ request.organizacion.nombre }}{% endblock %}
+{% block app_styles %}
+<link rel="stylesheet" href="{% static 'archivo/styles.css' %}">
+<script src="{% static 'archivo/alta.js' %}" defer></script>
+{% endblock %}
+{% block content %}
+<main class="wrap">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Archivo clínico</p>
+      <h1>Alta de expediente físico</h1>
+      <p class="sub">Seleccioná al paciente y registrá la ubicación de su legajo.</p>
+    </div>
+    <a class="button button-secondary" href="{% url 'archivo:buscar' %}">Volver al archivo</a>
+  </div>
+  <nav class="section-nav" aria-label="Menú de Expediente físico / Archivo">
+    <a href="{% url 'archivo:buscar' %}">Buscar</a>
+    <a href="{% url 'archivo:alta' %}" aria-current="page">＋ Crear expediente</a>
+  </nav>
+
+  {% if pacientes_disponibles or form.errors %}
+    <form method="post" class="archive-intake-form">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="form-errors" role="alert">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <section class="card intake-card patient-selection-card" aria-labelledby="identificacion-title">
+        <h2 id="identificacion-title">Paciente</h2>
+        <div class="field patient-select-field" data-patient-search-url="{% url 'archivo:buscar_pacientes_para_alta' %}">
+          <label for="patient-search">Buscar paciente</label>
+          <input id="patient-search" type="search" autocomplete="off" placeholder="Ingresá nombre, DNI o historia clínica" aria-controls="patient-search-results" aria-describedby="patient-search-help">
+          <small id="patient-search-help">Escribí al menos 2 caracteres para buscar entre pacientes sin expediente.</small>
+          <div id="patient-search-results" class="patient-search-results" role="listbox" aria-label="Pacientes encontrados"></div>
+          <div id="selected-patient" class="selected-patient" role="status" data-selected="{% if paciente_seleccionado %}true{% else %}false{% endif %}" data-patient-id="{{ paciente_seleccionado.pk|default:'' }}" data-patient-name="{{ paciente_seleccionado.apellido_nombre|default:'' }}" data-patient-document="{{ paciente_seleccionado.documento|default:'' }}"{% if not paciente_seleccionado %} hidden{% endif %}>
+            <span>{% if paciente_seleccionado %}{{ paciente_seleccionado.apellido_nombre }} · DNI {{ paciente_seleccionado.documento|default:"No registrado" }}{% endif %}</span>
+            <button type="button" class="patient-change-button">Cambiar</button>
+          </div>
+          {{ form.paciente }}
+          <div id="patient-search-status" class="patient-search-status" aria-live="polite"></div>
+          {% for error in form.paciente.errors %}<p class="error">{{ error }}</p>{% endfor %}
+        </div>
+      </section>
+
+      <section class="card intake-card physical-location-card" aria-labelledby="ubicacion-title">
+        <h2 id="ubicacion-title">Ubicación física</h2>
+        <p class="sub">Completá los datos que utiliza este archivo. El número interno de HC es opcional.</p>
+        <div class="fields">
+          {% for field in form %}
+            {% if field.name != "paciente" %}
+              <div class="field">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {% for error in field.errors %}<p class="error">{{ error }}</p>{% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="intake-form-actions">
+          <button type="submit" class="button button-primary"{% if not paciente_seleccionado %} disabled{% endif %}>Guardar expediente</button>
+          <a class="cancel-link" href="{% url 'archivo:buscar' %}">Cancelar</a>
+        </div>
+      </section>
+    </form>
+  {% else %}
+    <section class="empty-state" role="status">
+      <h2>No hay pacientes pendientes de alta</h2>
+      <p>Todos los pacientes registrados ya tienen un expediente físico. Buscá al paciente para consultar su ficha o completar la ubicación del expediente existente.</p>
+      <a class="button button-primary" href="{% url 'archivo:buscar' %}">Buscar paciente en Archivo</a>
+      <a class="button button-secondary" href="{% url 'pacientes:index' %}">Ver pacientes</a>
+    </section>
+  {% endif %}
+</main>
+{% endblock %}

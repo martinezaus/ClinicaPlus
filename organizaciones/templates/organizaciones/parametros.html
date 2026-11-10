@@ -1,0 +1,14 @@
+{% extends "organizaciones/base.html" %}
+{% load static %}
+{% block title %}Parámetros · Clínica+{% endblock %}
+{% block app_styles %}<link rel="stylesheet" href="{% static 'organizaciones/usuarios.css' %}">{% endblock %}
+{% block content %}
+<main class="user-admin user-admin-narrow">
+  <a class="back-link" href="{% url 'organizaciones:configuracion' %}">← Volver a Configuración</a>
+  <section class="user-admin-panel">
+    <p class="eyebrow">Configuración</p>
+    <h1>Parámetros</h1>
+    <p>Este espacio queda reservado para parámetros generales del sistema. Las opciones se agregarán cuando se definan los valores que deben administrarse.</p>
+  </section>
+</main>
+{% endblock %}

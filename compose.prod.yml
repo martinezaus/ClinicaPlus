@@ -1,0 +1,67 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-clinica}
+      POSTGRES_USER: ${POSTGRES_USER:-clinica}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    environment:
+      DJANGO_SETTINGS_MODULE: config.production
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Configure DJANGO_SECRET_KEY}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?Configure DJANGO_ALLOWED_HOSTS}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      DJANGO_HTTPS: ${DJANGO_HTTPS:-false}
+      DJANGO_TIME_ZONE: ${DJANGO_TIME_ZONE:-America/Argentina/Buenos_Aires}
+      POSTGRES_DB: ${POSTGRES_DB:-clinica}
+      POSTGRES_USER: ${POSTGRES_USER:-clinica}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
+    volumes:
+      - static_files:/app/staticfiles
+      - media_files:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import os; from urllib.request import Request, urlopen; proto = 'https' if os.getenv('DJANGO_HTTPS', 'false').lower() in ('1', 'true', 'yes', 'on') else 'http'; host = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')[0].strip(); urlopen(Request('http://127.0.0.1:8000/clinica+/', headers={'Host': host, 'X-Forwarded-Proto': proto})).read()"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  proxy:
+    image: nginx:1.28-alpine
+    restart: unless-stopped
+    environment:
+      DJANGO_HTTPS: ${DJANGO_HTTPS:-false}
+      NGINX_ENVSUBST_FILTER: ^DJANGO_HTTPS$
+    ports:
+      - "${CLINICA_BIND:-127.0.0.1}:${CLINICA_PORT:-8083}:80"
+    volumes:
+      - ./docker/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - static_files:/srv/staticfiles:ro
+      - media_files:/srv/media:ro
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  static_files:
+  media_files:
